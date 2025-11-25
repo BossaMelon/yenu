@@ -1,0 +1,30 @@
+{% extends "base.html" %}
+{% block content %}
+<form class="search" method="get" action="/">
+  <input type="text" name="q" placeholder="搜索标题或标签" value="{{ q }}"/>
+  <button class="button" type="submit">搜索</button>
+  <a class="button secondary" href="/">重置</a>
+  </form>
+
+<ul class="cards">
+  {% for r in recipes %}
+    <li class="card">
+      <a class="title" href="/recipes/{{ r.slug }}">{{ r.title }}</a>
+      <a class="thumb" href="/recipes/{{ r.slug }}" aria-label="查看 {{ r.title }}">
+        {% if r.dish_image_path %}
+          <img src="/{{ r.dish_image_path }}" alt="{{ r.title }}" />
+        {% else %}
+          <div class="img-placeholder" aria-hidden="true"></div>
+        {% endif %}
+      </a>
+      {% if r.tags %}
+      <div class="tags">
+        {% for t in r.tags %}
+          <a class="tag" href="/?q={{ t }}" title="按标签筛选：{{ t }}">{{ t }}</a>
+        {% endfor %}
+      </div>
+      {% endif %}
+    </li>
+  {% endfor %}
+  </ul>
+{% endblock %}

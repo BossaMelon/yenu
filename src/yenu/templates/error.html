@@ -1,0 +1,16 @@
+{% extends "base.html" %}
+{% block content %}
+<article class="card" style="padding:16px">
+  <h2>出错了</h2>
+  {% if friendly %}
+  <ul>
+    {% for m in friendly %}
+      <li>{{ m }}</li>
+    {% endfor %}
+  </ul>
+  {% else %}
+  <p>发生错误，请稍后重试</p>
+  {% endif %}
+  <p><a class="button" href="/">返回首页</a></p>
+</article>
+{% endblock %}

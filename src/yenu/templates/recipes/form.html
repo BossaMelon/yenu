@@ -1,0 +1,178 @@
+{% extends "base.html" %}
+{% block content %}
+<h2>{% if mode == 'edit' %}编辑菜谱{% else %}新建菜谱{% endif %}</h2>
+<div id="errorsBox" class="card" style="display:{% if errors %}block{% else %}none{% endif %};background:#1f2937;border:1px solid #ef4444;color:#fecaca;padding:12px;border-radius:8px">
+  <ul id="errorsList">
+    {% if errors %}{% for e in errors %}<li>{{ e }}</li>{% endfor %}{% endif %}
+  </ul>
+</div>
+<form class="form" method="post" enctype="multipart/form-data" action="{% if mode=='edit' %}/recipes/{{ slug }}/edit{% else %}/recipes/new{% endif %}">
+  <label>标题<input type="text" name="title" required value="{{ recipe.title if recipe else '' }}" /></label>
+  <label>标签（用英文逗号分隔）<input type="text" name="tags" value="{% if recipe and recipe.tags %}{{ recipe.tags|join(',') }}{% endif %}" /></label>
+  <div class="chips" aria-label="常用标签">
+    {% set presets = ['早餐','午餐','晚餐','荤菜','素菜','减脂','凉菜','调料'] %}
+    {% for t in presets %}
+      <button class="chip" type="button" data-tag="{{ t }}">{{ t }}</button>
+    {% endfor %}
+  </div>
+
+  <fieldset>
+    <legend>配料</legend>
+    <div id="ingredients">
+      {% if recipe %}
+        {% for ing in recipe.ingredients %}
+          <div class="row ing-row">
+            <input name="ing_name" placeholder="配料名" value="{{ ing.name }}" />
+            <input type="number" inputmode="decimal" step="any" name="ing_weight" placeholder="重量/数量" value="{% if ing.weight is not none %}{% if ing.weight == (ing.weight|int) %}{{ ing.weight|int }}{% else %}{{ ing.weight }}{% endif %}{% endif %}" />
+            <input name="ing_unit" placeholder="单位" value="{{ ing.unit }}" />
+          </div>
+        {% endfor %}
+      {% else %}
+        <div class="row ing-row">
+          <input name="ing_name" placeholder="配料名" />
+          <input type="number" inputmode="decimal" step="any" name="ing_weight" placeholder="重量/数量" />
+          <input name="ing_unit" placeholder="单位" />
+        </div>
+      {% endif %}
+    </div>
+    <div class="sticky-add"><button class="button secondary" type="button" onclick="addIng()">添加配料</button></div>
+  </fieldset>
+
+  <fieldset>
+    <legend>步骤</legend>
+    <div id="steps">
+      {% if recipe and recipe.steps %}
+        {% for s in recipe.steps %}
+        <div class="row step-row">
+          <input name="step_text" placeholder="步骤内容" value="{{ s.text }}" />
+          <input type="file" name="step_image" accept="image/jpeg,image/png" />
+          <button class="button danger mini step-del" type="button">删除步骤</button>
+          {% if s.image_path %}
+          <div class="step-preview">
+            <img src="/{{ s.image_path }}" alt="步骤图" style="width:80px;height:60px;object-fit:cover;border-radius:6px;border:1px solid #334155" />
+            <label><input type="checkbox" name="delete_step_image" value="{{ s.image_path }}"/> 删除图片</label>
+          </div>
+          {% endif %}
+        </div>
+        {% endfor %}
+      {% else %}
+        <div class="row step-row">
+          <input name="step_text" placeholder="步骤内容" />
+          <input type="file" name="step_image" accept="image/jpeg,image/png" />
+          <button class="button danger mini step-del" type="button">删除步骤</button>
+        </div>
+      {% endif %}
+    </div>
+    <div class="sticky-add"><button class="button secondary" type="button" onclick="addStep()">添加步骤</button></div>
+    <!-- 兼容老数据的隐藏域（测试用） -->
+    <textarea name="step_list" style="display:none">{% if recipe and recipe.steps %}{{ recipe.steps | map(attribute='text') | join('\n') }}{% endif %}</textarea>
+  </fieldset>
+
+  <div>
+    <label>成品图 <input type="file" name="dish_image" accept="image/jpeg,image/png" /></label>
+    {% if mode == 'edit' and recipe and recipe.dish_image_path %}
+      <div style="margin-top:8px;display:flex;align-items:center;gap:10px">
+        <img src="/{{ recipe.dish_image_path }}" alt="成品图" style="width:120px;height:80px;object-fit:cover;border-radius:8px;border:1px solid #334155" />
+        <label><input type="checkbox" name="delete_dish" value="1" /> 删除成品图</label>
+      </div>
+    {% endif %}
+  </div>
+
+  
+
+  <div class="actions">
+    <button class="button" type="submit">保存</button>
+    <a class="button secondary" href="/">取消</a>
+  </div>
+</form>
+
+<script>
+function addIng() {
+  const row = document.createElement('div');
+  row.className='row';
+  row.innerHTML = '<input name="ing_name" placeholder="配料名" />' +
+                  '<input name="ing_weight" placeholder="重量/数量" />' +
+                  '<input name="ing_unit" placeholder="单位" />';
+  document.getElementById('ingredients').appendChild(row);
+}
+
+// Simple client-side validation for better UX
+document.querySelector('form.form').addEventListener('submit', function(e) {
+  const errors = [];
+  const title = this.querySelector('input[name="title"]').value.trim();
+  if (!title) errors.push('标题不能为空');
+
+  const ingNames = Array.from(this.querySelectorAll('input[name="ing_name"]'))
+    .map(i => i.value.trim())
+    .filter(Boolean);
+  if (ingNames.length < 1) errors.push('至少需要一个配料');
+
+  const steps = Array.from(this.querySelectorAll('input[name="step_text"]'))
+    .map(i => i.value.trim()).filter(Boolean);
+  if (steps.length < 1) errors.push('至少需要一个步骤');
+
+  if (errors.length) {
+    e.preventDefault();
+    const box = document.getElementById('errorsBox');
+    const list = document.getElementById('errorsList');
+    list.innerHTML = errors.map(m => `<li>${m}</li>`).join('');
+    box.style.display = 'block';
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+});
+
+// ingredient images removed per latest requirements
+function addStep(){
+  const row = document.createElement('div');
+  row.className = 'row step-row';
+  row.innerHTML = '<input name="step_text" placeholder="步骤内容" />' +
+                  '<input type="file" name="step_image" accept="image/jpeg,image/png" />' +
+                  '<button class="button danger mini step-del" type="button">删除步骤</button>';
+  document.getElementById('steps').appendChild(row);
+}
+
+// Delete step handler (removes row and schedules image deletion if needed)
+document.getElementById('steps').addEventListener('click', function(e){
+  const btn = e.target.closest('.step-del');
+  if(!btn) return;
+  const row = btn.closest('.step-row');
+  if(!row) return;
+  // If row has an existing image preview, add hidden delete input
+  const img = row.querySelector('.step-preview img');
+  if(img){
+    let src = img.getAttribute('src') || '';
+    try{
+      // normalize to path part only
+      if(src.startsWith(window.location.origin)) src = src.slice(window.location.origin.length);
+      if(src.startsWith('/')) src = src.slice(1);
+    }catch(_){/* noop */}
+    if(src){
+      const del = document.createElement('input');
+      del.type = 'hidden';
+      del.name = 'delete_step_image';
+      del.value = src;
+      document.querySelector('form.form').appendChild(del);
+    }
+  }
+  row.remove();
+});
+
+// Preset tag chips: append unique tag into input
+(function(){
+  const box = document.querySelector('.chips');
+  if(!box) return;
+  const input = document.querySelector('input[name="tags"]');
+  function parse(val){
+    return val.split(',').map(s=>s.trim()).filter(Boolean);
+  }
+  box.addEventListener('click', (e)=>{
+    const btn = e.target.closest('[data-tag]');
+    if(!btn) return;
+    const tag = btn.getAttribute('data-tag');
+    const list = parse(input.value);
+    if(!list.includes(tag)) list.push(tag);
+    input.value = list.join(',');
+  });
+})();
+</script>
+{% endblock %}

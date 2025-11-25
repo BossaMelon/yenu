@@ -1,0 +1,17 @@
+version: "3.8"
+services:
+  yenu:
+    image: yenu:latest
+    container_name: yenu
+    ports:
+      - "8000:8000"
+    environment:
+      - YENU_BASE_DIR=/data
+      - YENU_RECIPES_DIR=/data/recipes
+      - YENU_UPLOADS_DIR=/data/uploads
+    volumes:
+      - ./data:/data/recipes
+      - ./assets/uploads:/data/uploads
+      - ./src/yenu/static:/app/src/yenu/static:ro
+    restart: unless-stopped
+

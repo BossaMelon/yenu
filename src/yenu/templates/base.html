@@ -1,0 +1,25 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Yenu</title>
+    <link rel="stylesheet" href="/static/css/styles.css" />
+  </head>
+  <body>
+    <header class="container">
+      <h1><a href="/">Yenu</a></h1>
+      <nav>
+        {% if request.url.path == '/' %}
+          <a class="button" href="/recipes/new">新建菜谱</a>
+        {% else %}
+          <a class="button secondary" href="/">返回首页</a>
+        {% endif %}
+      </nav>
+    </header>
+    <main class="container">
+      {% block content %}{% endblock %}
+    </main>
+    <footer class="container muted">雪阳的科学饲养</footer>
+  </body>
+  </html>

@@ -1,0 +1,59 @@
+{% extends "base.html" %}
+{% block content %}
+<article class="recipe">
+  <header>
+    <h2>{{ recipe.title }}</h2>
+    <div class="actions buttons-row">
+      <a class="button" href="/recipes/{{ slug }}/edit">编辑菜谱</a>
+      <form method="post" action="/recipes/{{ slug }}/delete" style="display:inline" onsubmit="return confirm('确定删除该菜谱？');">
+        <button class="button danger" type="submit">删除菜谱</button>
+      </form>
+    </div>
+    {% if recipe.tags %}
+      <div class="tags">{% for t in recipe.tags %}<span class="tag">{{ t }}</span>{% endfor %}</div>
+    {% endif %}
+  </header>
+
+  {% if recipe.dish_image_path %}
+  <img class="hero" src="/{{ recipe.dish_image_path }}" alt="{{ recipe.title }}" />
+  {% endif %}
+
+  <section>
+    <h3>配料</h3>
+    <ul>
+      {% for ing in recipe.ingredients %}
+      <li>
+        {{ ing.name }} — 
+        {% if ing.weight and ing.weight > 0 %}
+          {% set w = ing.weight %}
+          {% if w == (w|int) %}
+            {{ w|int }} {{ ing.unit }}
+          {% else %}
+            {{ w }} {{ ing.unit }}
+          {% endif %}
+        {% else %}
+          适量
+        {% endif %}
+      </li>
+      {% endfor %}
+    </ul>
+  </section>
+
+
+
+  <section>
+    <h3>步骤</h3>
+    <ol>
+      {% for s in recipe.steps %}
+      <li>
+        <div>{{ s.text }}</div>
+        {% if s.image_path %}
+          <img src="/{{ s.image_path }}" alt="步骤图" style="width:100%;max-height:380px;object-fit:cover;border-radius:10px;border:1px solid #334155;margin:8px 0" />
+        {% endif %}
+      </li>
+      {% endfor %}
+    </ol>
+  </section>
+
+</article>
+{% endblock %}
