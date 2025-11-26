@@ -1,0 +1,47 @@
+# Byte-compiled / cache
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Environments
+.env
+.env.*
+.venv/
+venv/
+env/
+.python-version
+
+# Conda
+.conda/
+*.conda
+conda-meta/
+
+# Distribution / packaging
+build/
+dist/
+*.egg-info/
+
+# Tooling caches
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+.cache/
+.coverage
+coverage.xml
+htmlcov/
+
+# Editors / OS
+.DS_Store
+.idea/
+.vscode/
+
+# App runtime data
+assets/uploads/
+data/recipes/*.zip
+data/recipes/*.json
+data/recipes/*.bak
+data/recipes/*.tmp
+
+# Logs / temp
+*.log
+tmp/

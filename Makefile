@@ -1,6 +1,8 @@
 SHELL := /bin/bash
+IMAGE ?= docker.io/bossamelon/yenu
+VERSION ?= latest
 
-.PHONY: setup run test lint seed docker-build docker-up
+.PHONY: setup run test lint seed docker-build docker-build-amd64 docker-up
 
 setup:
 	conda env update -n yenu -f environment.yml --prune || conda env create -n yenu -f environment.yml
@@ -20,6 +22,14 @@ seed:
 
 docker-build:
 	docker build -t yenu:latest .
+
+docker-build-amd64:
+	# Ensure buildx builder is available for cross-arch builds
+	docker buildx use yenu-builder || docker buildx create --name yenu-builder --use
+	docker buildx build --platform linux/amd64 \
+		-t $(IMAGE):$(VERSION) \
+		-t $(IMAGE):latest \
+		--push .
 
 docker-up:
 	docker compose up -d

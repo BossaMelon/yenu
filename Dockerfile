@@ -18,7 +18,7 @@ COPY environment.yml /app/
 
 # Use pip instead of conda inside container for smaller image
 RUN pip install --upgrade pip && \
-    pip install fastapi uvicorn pydantic pyyaml jinja2 python-multipart pillow python-slugify
+    pip install fastapi uvicorn pydantic pyyaml jinja2 python-multipart pillow python-slugify pypinyin requests
 
 COPY src /app/src
 COPY assets /app/assets
