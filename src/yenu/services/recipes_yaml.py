@@ -97,12 +97,21 @@ def read_recipe(slug: str) -> Optional[Recipe]:
 def write_recipe(slug: str, recipe: Recipe) -> str:
     # Returns slug (may change if title changes)
     desired_slug = slug_for_title(recipe.title)
+    old_slug = slug
     if desired_slug != slug:
         # rename file after write (caller should manage assets rename)
         slug = desired_slug
     path = _recipe_path_for_slug(slug)
     data = yaml.safe_dump(recipe.dict_for_yaml(), allow_unicode=True, sort_keys=False)
     atomic_write(path, data.encode("utf-8"))
+    if slug != old_slug:
+        # Remove stale YAML after slug/title change to avoid duplicate ghost recipes
+        old_path = _recipe_path_for_slug(old_slug)
+        if old_path.exists() and old_path != path:
+            try:
+                old_path.unlink()
+            except Exception:
+                pass
     return slug
 
 

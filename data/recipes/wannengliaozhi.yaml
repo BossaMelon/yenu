@@ -19,4 +19,5 @@ ingredients:
 - name: 辣椒油
 steps:
 - text: 混合
-dish_image_path: assets/uploads/wan-neng-liao-zhi/img-9767.jpg
+- text: asdfasdf
+dish_image_path: assets/uploads/wannengliaozhi/img-9767.jpg

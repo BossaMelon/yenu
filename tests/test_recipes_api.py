@@ -19,6 +19,7 @@ def make_client(tmp_path: Path) -> TestClient:
 
 def test_api_crud_and_search(tmp_path: Path):
     c = make_client(tmp_path)
+    from yenu.settings import RECIPES_DIR
 
     # Create
     payload = {
@@ -62,6 +63,10 @@ def test_api_crud_and_search(tmp_path: Path):
     assert r.status_code == 200
     new_slug = r.json()["slug"]
     assert new_slug != slug
+    old_path = RECIPES_DIR / f"{slug}.yaml"
+    new_path = RECIPES_DIR / f"{new_slug}.yaml"
+    assert new_path.exists()
+    assert not old_path.exists()
 
     # Ingredient search
     r = c.get("/api/recipes", params={"ingredient": "banana"})
@@ -78,4 +83,3 @@ def test_api_crud_and_search(tmp_path: Path):
     assert r.status_code == 200
     r = c.get(f"/api/recipes/{new_slug}")
     assert r.status_code == 404
-
