@@ -10,7 +10,7 @@
   <label>标题<input type="text" name="title" required value="{{ recipe.title if recipe else '' }}" /></label>
   <label>标签（用英文逗号分隔）<input type="text" name="tags" value="{% if recipe and recipe.tags %}{{ recipe.tags|join(',') }}{% endif %}" /></label>
   <div class="chips" aria-label="常用标签">
-    {% set presets = ['早餐','午餐','晚餐','荤菜','素菜','减脂','凉菜','调料'] %}
+    {% set presets = ['早餐','午餐','晚餐','荤菜','素菜','减脂','下饭','凉菜','调料'] %}
     {% for t in presets %}
       <button class="chip" type="button" data-tag="{{ t }}">{{ t }}</button>
     {% endfor %}
