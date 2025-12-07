@@ -23,14 +23,14 @@
         {% for ing in recipe.ingredients %}
           <div class="row ing-row">
             <input name="ing_name" placeholder="配料名" value="{{ ing.name }}" />
-            <input type="number" inputmode="decimal" step="any" name="ing_weight" placeholder="重量/数量" value="{% if ing.weight is not none %}{% if ing.weight == (ing.weight|int) %}{{ ing.weight|int }}{% else %}{{ ing.weight }}{% endif %}{% endif %}" />
+            <input name="ing_weight" placeholder="重量/数量（可填文字，如“少许”）" value="{% if ing.weight is not none %}{{ ing.weight }}{% endif %}" />
             <input name="ing_unit" placeholder="单位" value="{{ ing.unit }}" />
           </div>
         {% endfor %}
       {% else %}
         <div class="row ing-row">
           <input name="ing_name" placeholder="配料名" />
-          <input type="number" inputmode="decimal" step="any" name="ing_weight" placeholder="重量/数量" />
+          <input name="ing_weight" placeholder="重量/数量（可填文字，如“少许”）" />
           <input name="ing_unit" placeholder="单位" />
         </div>
       {% endif %}
@@ -43,9 +43,10 @@
     <div id="steps">
       {% if recipe and recipe.steps %}
         {% for s in recipe.steps %}
-        <div class="row step-row">
+        <div class="step-row">
           <input name="step_text" placeholder="步骤内容" value="{{ s.text }}" />
           <input type="file" name="step_image" accept="image/jpeg,image/png" />
+          <button class="button secondary mini step-add" type="button">添加步骤</button>
           <button class="button danger mini step-del" type="button">删除步骤</button>
           {% if s.image_path %}
           <div class="step-preview">
@@ -56,14 +57,14 @@
         </div>
         {% endfor %}
       {% else %}
-        <div class="row step-row">
+        <div class="step-row">
           <input name="step_text" placeholder="步骤内容" />
           <input type="file" name="step_image" accept="image/jpeg,image/png" />
+          <button class="button secondary mini step-add" type="button">添加步骤</button>
           <button class="button danger mini step-del" type="button">删除步骤</button>
         </div>
       {% endif %}
     </div>
-    <div class="sticky-add"><button class="button secondary" type="button" onclick="addStep()">添加步骤</button></div>
     <!-- 兼容老数据的隐藏域（测试用） -->
     <textarea name="step_list" style="display:none">{% if recipe and recipe.steps %}{{ recipe.steps | map(attribute='text') | join('\n') }}{% endif %}</textarea>
   </fieldset>
@@ -91,7 +92,7 @@ function addIng() {
   const row = document.createElement('div');
   row.className='row';
   row.innerHTML = '<input name="ing_name" placeholder="配料名" />' +
-                  '<input name="ing_weight" placeholder="重量/数量" />' +
+                  '<input name="ing_weight" placeholder="重量/数量（可填文字，如“少许”）" />' +
                   '<input name="ing_unit" placeholder="单位" />';
   document.getElementById('ingredients').appendChild(row);
 }
@@ -122,39 +123,51 @@ document.querySelector('form.form').addEventListener('submit', function(e) {
 });
 
 // ingredient images removed per latest requirements
-function addStep(){
+function addStep(afterRow){
   const row = document.createElement('div');
-  row.className = 'row step-row';
+  row.className = 'step-row';
   row.innerHTML = '<input name="step_text" placeholder="步骤内容" />' +
                   '<input type="file" name="step_image" accept="image/jpeg,image/png" />' +
+                  '<button class="button secondary mini step-add" type="button">添加步骤</button>' +
                   '<button class="button danger mini step-del" type="button">删除步骤</button>';
-  document.getElementById('steps').appendChild(row);
+  const container = document.getElementById('steps');
+  if(afterRow && afterRow.parentNode === container){
+    afterRow.insertAdjacentElement('afterend', row);
+  }else{
+    container.appendChild(row);
+  }
 }
 
 // Delete step handler (removes row and schedules image deletion if needed)
 document.getElementById('steps').addEventListener('click', function(e){
-  const btn = e.target.closest('.step-del');
-  if(!btn) return;
-  const row = btn.closest('.step-row');
+  const addBtn = e.target.closest('.step-add');
+  const delBtn = e.target.closest('.step-del');
+  const row = e.target.closest('.step-row');
   if(!row) return;
-  // If row has an existing image preview, add hidden delete input
-  const img = row.querySelector('.step-preview img');
-  if(img){
-    let src = img.getAttribute('src') || '';
-    try{
-      // normalize to path part only
-      if(src.startsWith(window.location.origin)) src = src.slice(window.location.origin.length);
-      if(src.startsWith('/')) src = src.slice(1);
-    }catch(_){/* noop */}
-    if(src){
-      const del = document.createElement('input');
-      del.type = 'hidden';
-      del.name = 'delete_step_image';
-      del.value = src;
-      document.querySelector('form.form').appendChild(del);
-    }
+  if(addBtn){
+    addStep(row);
+    return;
   }
-  row.remove();
+  if(delBtn){
+    // If row has an existing image preview, add hidden delete input
+    const img = row.querySelector('.step-preview img');
+    if(img){
+      let src = img.getAttribute('src') || '';
+      try{
+        // normalize to path part only
+        if(src.startsWith(window.location.origin)) src = src.slice(window.location.origin.length);
+        if(src.startsWith('/')) src = src.slice(1);
+      }catch(_){/* noop */}
+      if(src){
+        const del = document.createElement('input');
+        del.type = 'hidden';
+        del.name = 'delete_step_image';
+        del.value = src;
+        document.querySelector('form.form').appendChild(del);
+      }
+    }
+    row.remove();
+  }
 });
 
 // Preset tag chips: append unique tag into input

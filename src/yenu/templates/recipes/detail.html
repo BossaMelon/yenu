@@ -24,12 +24,17 @@
       {% for ing in recipe.ingredients %}
       <li>
         {{ ing.name }} — 
-        {% if ing.weight and ing.weight > 0 %}
-          {% set w = ing.weight %}
-          {% if w == (w|int) %}
-            {{ w|int }} {{ ing.unit }}
+        {% set has_weight = ing.weight is not none and ing.weight != '' and ing.weight != 0 and ing.weight != 0.0 %}
+        {% if has_weight %}
+          {% if ing.weight is number %}
+            {% set w = ing.weight %}
+            {% if w == (w|int) %}
+              {{ w|int }}{{ ing.unit }}
+            {% else %}
+              {{ w }}{{ ing.unit }}
+            {% endif %}
           {% else %}
-            {{ w }} {{ ing.unit }}
+            {{ ing.weight }}{% if ing.unit %}{{ ing.unit }}{% endif %}
           {% endif %}
         {% else %}
           适量

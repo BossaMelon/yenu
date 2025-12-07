@@ -8,14 +8,29 @@ from pydantic import BaseModel, Field, validator
 
 class Ingredient(BaseModel):
     name: str = Field(..., min_length=1)
-    weight: Optional[float] = Field(default=None)  # None means 适量，不写入 YAML
+    weight: Optional[float | str] = Field(default=None)  # None means 适量，不写入 YAML
     unit: Optional[str] = Field(default="", min_length=0)
+
+    @validator("weight", pre=True)
+    def _normalize_weight(cls, v: Any):  # type: ignore[override]
+        if v is None:
+            return None
+        if isinstance(v, str):
+            v = v.strip()
+            if v == "":
+                return None
+            try:
+                num = float(v)
+                return num
+            except Exception:
+                return v
+        return v
 
     # If weight is empty/zero, force unit to empty string per rule
     @validator("unit", always=True)
     def _unit_when_no_weight(cls, v: Optional[str], values):  # type: ignore[override]
         w = values.get("weight", None)
-        if w in (None, 0, 0.0):
+        if w in (None, 0, 0.0, ""):
             return ""
         return (v or "").strip()
 

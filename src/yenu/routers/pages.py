@@ -53,10 +53,11 @@ def _parse_ingredients(raw_names: list[str], raw_weights: list[str], raw_units: 
             weight = None
             unit = ""
         else:
+            # Keep numeric as number, otherwise preserve free-text weight
             try:
                 weight = float(w_str)
             except Exception:
-                weight = None
+                weight = w_str
             unit = (u or "").strip()
         items.append(Ingredient(name=n, weight=weight, unit=unit))
     return items

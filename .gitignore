@@ -217,3 +217,11 @@ __marimo__/
 
 # dsstore
 .DS_Store
+
+# Keep only .gitkeep in assets/
+assets/*
+!assets/.gitkeep
+
+# Keep only .gitkeep in data/
+data/*
+!data/.gitkeep

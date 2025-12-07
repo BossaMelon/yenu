@@ -73,6 +73,20 @@ def test_api_crud_and_search(tmp_path: Path):
     assert r.status_code == 200
     assert r.json()["total"] == 1
 
+    # Allow non-numeric ingredient weight
+    text_payload = {
+        "title": "Salt Pinch",
+        "tags": "",
+        "ingredients": json.dumps([{"name": "Salt", "weight": "少许", "unit": ""}]),
+        "steps": json.dumps(["Sprinkle"]),
+    }
+    r = c.post("/api/recipes", data=text_payload)
+    assert r.status_code == 200, r.text
+    text_slug = r.json()["slug"]
+    r = c.get(f"/api/recipes/{text_slug}")
+    assert r.status_code == 200
+    assert r.json()["ingredients"][0]["weight"] == "少许"
+
     # Export
     r = c.get("/api/export")
     assert r.status_code == 200

@@ -93,7 +93,6 @@ h1 a{color:var(--fg);text-decoration:none}
 /* Recipe detail */
 .recipe header{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}
 .recipe header .tags{flex-basis:100%;margin-top:8px}
-.
 .buttons-row{display:flex;gap:10px;flex-wrap:wrap}
 .buttons-row .button{min-width:120px;text-align:center;justify-content:center}
 img.hero{width:100%;max-height:420px;object-fit:cover;border-radius:12px;margin:12px 0}
@@ -120,6 +119,11 @@ form.form label{display:flex;flex-direction:column;gap:6px}
 fieldset{border:1px solid var(--border);border-radius:12px;padding:10px}
 fieldset legend{padding:0 6px;color:#cbd5e1}
 fieldset .row{display:grid;grid-template-columns:2fr 1fr 1fr;gap:10px;margin-bottom:8px}
+/* Step rows should not inherit grid; force flex */
+fieldset .row.step-row{
+  display:flex !important;
+  grid-template-columns:none;
+}
 /* Ingredients row: keep one line on all screens */
 .ing-row{grid-template-columns:2fr 1fr 1fr}
 .ing-row input{width:100%;min-width:0}
@@ -131,9 +135,39 @@ input[type=number]::-webkit-outer-spin-button,
 input[type=number]::-webkit-inner-spin-button{ -webkit-appearance:none; margin:0 }
 input[type=number]{ appearance:textfield }
 /* Steps layout overrides */
-.step-row{display:flex;gap:8px;align-items:center;margin-bottom:8px}
-.step-row input[type="text"]{flex:1}
-.step-preview{display:flex;align-items:center;gap:8px}
+.step-row{
+  display:flex;
+  gap:6px;
+  align-items:center;
+  margin-bottom:8px;
+  flex-wrap:nowrap;
+  white-space:nowrap;
+  overflow-x:auto;
+  padding-bottom:2px;
+}
+ .step-row input[type="text"]{
+  flex: 1 1 100%;
+  min-width: 0;
+  width: 100%;
+}
+.step-row input[type="file"]{
+  flex:0 0 120px;
+  min-width:120px;
+  max-width:150px;
+  width:120px;
+  white-space:nowrap;
+  overflow:hidden;
+  text-overflow:ellipsis;
+  font-size:.85rem;
+  padding:6px 8px;
+}
+.step-row input[type="file"]::-webkit-file-upload-button{
+  padding:6px 8px;
+  font-size:.85rem;
+}
+.step-row .step-add,.step-row .step-del{flex:0 0 auto;white-space:nowrap}
+.step-row .button{padding:6px 8px;min-height:32px;height:32px;font-size:.9rem}
+.step-row .step-preview{width:100%;display:flex;align-items:center;gap:8px}
 
 /* Thumbs list */
 .thumb-list{display:flex;flex-wrap:wrap;gap:10px;margin-top:8px}
