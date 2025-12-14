@@ -21,8 +21,7 @@ RUN pip install --upgrade pip && \
     pip install fastapi uvicorn pydantic pyyaml jinja2 python-multipart pillow python-slugify pypinyin requests
 
 COPY src /app/src
-COPY assets /app/assets
-COPY data /app/data
+
 
 EXPOSE 8000
 
